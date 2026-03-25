@@ -1279,7 +1279,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
   const blueVal = Math.round(80 + pct * 0.4);
   fillEl.style.background = `rgba(30, ${blueVal}, 180, 0.5)`;
 
-  document.getElementById('waterDir').textContent = isRising ? '↗ VAXANDI' : '↘ MINNKANDI';
+  document.getElementById('waterDir').textContent = isRising ? '↗ HÆKKANDI' : '↘ LÆKKANDI';
 
   // Countdown to next tide change
   const eventsAhead = tides.filter(t => t.timeH > h);
