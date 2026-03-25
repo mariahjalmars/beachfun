@@ -3,7 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Floki's Beach Check</title>
+<title>Floki's Strandvakt</title>
+
+<!-- Share thumbnail & preview -->
+<meta property="og:title" content="🐾 Floki's Strandvakt" />
+<meta property="og:description" content="Má Floki fara á ströndina í dag? Flóðamælir fyrir Reykjavík 🌊" />
+<meta property="og:image" content="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
+<meta property="og:url" content="https://mariahjalmars.github.io/beachfun/floki-beach.html" />
+<meta property="og:type" content="website" />
+
+<!-- iPhone / iMessage specific -->
+<meta name="apple-mobile-web-app-title" content="Floki's Strönd" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
+
+<!-- Twitter/X card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="🐾 Floki's Strandvakt" />
+<meta name="twitter:description" content="Má Floki fara á ströndina í dag? Flóðamælir fyrir Reykjavík 🌊" />
+<meta name="twitter:image" content="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -904,8 +922,8 @@
       <div class="floki-overlay" id="flokiOverlay"></div>
       <div class="floki-caption" id="flokiCaption">🐾</div>
     </div>
-    <h1>Floki's <span>Beach Check</span></h1>
-    <p class="subtitle">Reykjavik, Iceland</p>
+    <h1>Floki's <span>Strandvakt</span></h1>
+    <p class="subtitle">Reykjavík, Ísland</p>
   </div>
 
   <div class="location-badge">
@@ -943,7 +961,7 @@
         <div class="water-level-line" id="waterLevelLine"></div>
       </div>
       <div class="water-right">
-        <div class="water-dir" id="waterDir">↗ Rising</div>
+        <div class="water-dir" id="waterDir">↗ Í vaxandi</div>
       </div>
     </div>
 
@@ -955,7 +973,7 @@
         <span class="countdown-icon" id="countdownIcon">🌊</span>
         <div>
           <div class="countdown-time" id="countdownTime">—</div>
-          <div class="countdown-label" id="countdownLabel">until high tide</div>
+          <div class="countdown-label" id="countdownLabel">þar til flóð</div>
         </div>
       </div>
       <div class="countdown-after" id="countdownAfter"></div>
@@ -967,13 +985,13 @@
   <div class="info-grid">
     <div class="info-tile">
       <span class="tile-icon">⬆️</span>
-      <div class="tile-label">Next High</div>
+      <div class="tile-label">Næsta Flóð</div>
       <div class="tile-value" id="nextHighVal">—</div>
       <div class="tile-sub" id="nextHighHeight">—</div>
     </div>
     <div class="info-tile">
       <span class="tile-icon">⬇️</span>
-      <div class="tile-label">Next Low</div>
+      <div class="tile-label">Næsta Fjara</div>
       <div class="tile-value" id="nextLowVal">—</div>
       <div class="tile-sub" id="nextLowHeight">—</div>
     </div>
@@ -981,7 +999,7 @@
 
   <!-- Today's Timeline -->
   <div class="timeline-card">
-    <div class="timeline-title">Today's Tide Schedule</div>
+    <div class="timeline-title">Flóðatafla dagsins</div>
     <div class="timeline" id="timeline">
       <div class="error-msg">Loading schedule…</div>
     </div>
@@ -990,21 +1008,21 @@
   <!-- Notification Card -->
   <div class="notif-card">
     <div class="notif-header">
-      <div class="notif-title">🔔 Beach Alerts for Floki</div>
+      <div class="notif-title">🔔 Strandviðvaranir fyrir Floka</div>
       <div class="notif-status default" id="notifStatus">Off</div>
     </div>
     <div class="notif-body">
-      <div class="notif-desc" id="notifDesc">Get notified 30 minutes before low tide — the best time to go!</div>
+      <div class="notif-desc" id="notifDesc">Fáðu tilkynningu 30 mínútum fyrir fjöru — besta tíminn til að fara!</div>
       <div class="notif-times" id="notifTimes"></div>
       <button class="notif-btn" id="notifBtn" onclick="requestNotifications()">
-        🔔 Notify me at low tide
+        🔔 Tilkynna mér við fjöru
       </button>
       <div class="notif-ios-tip" id="notifTip" style="display:none"></div>
     </div>
   </div>
 
   <button class="refresh-btn" id="refreshBtn" onclick="fetchTideData()">
-    <span id="refreshIcon">🔄</span> Refresh for Floki
+    <span id="refreshIcon">🔄</span> Uppfæra fyrir Floka
   </button>
   <div class="last-updated" id="lastUpdated"></div>
 </div>
@@ -1036,38 +1054,38 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
     return {
       status: 'no',
       emoji: '🚫',
-      title: 'Stay home, Floki!',
-      desc: 'The tide is very high right now — the beach is mostly underwater. Not a good day for fetch!'
+      title: 'Við förum ekki núna - það er flóð!',
+      desc: 'Flóðið er mjög hátt — strandinn er nánast undir vatni. Ekki góður dagur í prik!'
     };
   }
   if (heightM > 1.8) {
     return {
       status: 'caution',
       emoji: '⚠️',
-      title: 'Muddy paws ahead',
-      desc: 'The tide is fairly high. You can visit but expect wet paws and limited dry beach space. Watch the waves!'
+      title: 'Það er of hættulegt núna, Flóki!',
+      desc: 'Flóðið er frekar hátt. Má fara en búast við blautum pötum. Varist bylgjurnar!'
     };
   }
   if (isRising && nextHighH > 2.5 && nextHighMins < 90) {
     return {
       status: 'caution',
       emoji: '⏳',
-      title: 'Go soon or wait',
-      desc: `Tide is rising fast — high tide in ${Math.round(nextHighMins)} min. Go now and keep it short, or wait until after high tide!`
+      title: 'Farðu fljótt eða bíddu!',
+      desc: `Flóðið er að hækka hratt — flóð eftir ${Math.round(nextHighMins)} mín. Farðu núna og vertu stutt, eða bíddu eftir flóð!`
     };
   }
   return {
     status: 'go',
     emoji: '🐕',
-    title: 'Let\'s go, Floki!',
-    desc: 'Low tide — perfect conditions for running, fetching sticks and chasing waves. Enjoy the beach!'
+    title: 'Förum Flóki!',
+    desc: 'Fjara — fullkomið fyrir hlaupi, prik og bylgjur. Njótið strandarinnar!'
   };
 }
 
 function getBeachBadge(heightM) {
-  if (heightM > 2.8) return { cls: 'no-badge', label: 'Too high' };
-  if (heightM > 1.8) return { cls: 'caution-badge', label: 'Caution' };
-  return { cls: 'go-badge', label: 'Great time!' };
+  if (heightM > 2.8) return { cls: 'no-badge', label: 'Of hátt' };
+  if (heightM > 1.8) return { cls: 'caution-badge', label: 'Varúð' };
+  return { cls: 'go-badge', label: 'Frábært!' };
 }
 
 // ── Fetch tide data from tide-forecast.com via Open-Meteo Marine API ──
@@ -1260,7 +1278,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
   const blueVal = Math.round(80 + pct * 0.4);
   fillEl.style.background = `rgba(30, ${blueVal}, 180, 0.5)`;
 
-  document.getElementById('waterDir').textContent = isRising ? '↗ Rising' : '↘ Falling';
+  document.getElementById('waterDir').textContent = isRising ? '↗ Í vaxandi' : '↘ Í minnkandi';
 
   // Countdown to next tide change
   const eventsAhead = tides.filter(t => t.timeH > h);
@@ -1273,7 +1291,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
 
   document.getElementById('countdownIcon').textContent = isNextHigh ? '🌊' : '🏖️';
   document.getElementById('countdownTime').textContent = timeStr;
-  document.getElementById('countdownLabel').textContent = isNextHigh ? 'until high tide' : 'until low tide';
+  document.getElementById('countdownLabel').textContent = isNextHigh ? 'þar til flóð' : 'þar til fjara';
 
   // Show what comes after
   const afterEvents = eventsAhead.slice(1);
@@ -1283,8 +1301,8 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
     const aHrs = Math.floor(afterMins / 60);
     const aMins = Math.round(afterMins % 60);
     const afterTimeStr = aHrs > 0 ? `${aHrs}h ${aMins}m` : `${aMins} min`;
-    const afterLabel = afterEvent.type === 'high' ? '🌊 high tide' : '🏖️ low tide';
-    document.getElementById('countdownAfter').textContent = `Then ${afterLabel} in ${afterTimeStr}`;
+    const afterLabel = afterEvent.type === 'high' ? '🌊 flóð' : '🏖️ fjara';
+    document.getElementById('countdownAfter').textContent = `Svo ${afterLabel} eftir ${afterTimeStr}`;
   }
 
   // Info tiles
@@ -1313,7 +1331,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
     const isHigh = event.type === 'high';
     const dotClass = isCurrent ? 'current' : isHigh ? 'high' : 'low';
     const emoji = isCurrent ? '📍' : isHigh ? '🌊' : '🏖️';
-    const label = isCurrent ? 'Right now' : isHigh ? 'High tide' : 'Low tide';
+    const label = isCurrent ? 'Núna' : isHigh ? 'Flóð' : 'Fjara';
     const isPast = !isCurrent && event.timeH < h;
 
     const item = document.createElement('div');
@@ -1338,7 +1356,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
   const nowStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const src = window._dataSource || 'fallback';
   const dot = src === 'live' ? '🟢 Live data' : '🟡 Estimated';
-  document.getElementById('lastUpdated').textContent = (location.protocol === 'file:' ? 'Estimated · ' : 'Live · ') + 'Updated ' + nowStr;
+  document.getElementById('lastUpdated').textContent = (location.protocol === 'file:' ? 'Áætlað · ' : 'Í beinni · ') + 'Uppfært ' + nowStr;
 }
 
 function formatTime12(h) {
@@ -1377,31 +1395,31 @@ function updateNotifUI() {
     statusEl.className = 'notif-status denied';
     btnEl.disabled = true;
     tipEl.style.display = 'block';
-    tipEl.innerHTML = '📱 <strong>iPhone tip:</strong> Open this page in Safari, tap Share → <strong>Add to Home Screen</strong>, then open from your Home Screen. Notifications require iOS 16.4+ with the app added to Home Screen.';
+    tipEl.innerHTML = '📱 <strong>iPhone tip:</strong> Opnaðu þessa síðu í Safari, ýttu á Deila → <strong>Bæta við heimaskjá</strong>, opnaðu þaðan. Tilkynningar þurfa iOS 16.4+ og app á heimaskjá.';
     return;
   }
 
   if (perm === 'granted') {
     statusEl.textContent = 'On ✓';
     statusEl.className = 'notif-status granted';
-    btnEl.textContent = '✅ Alerts scheduled!';
+    btnEl.textContent = '✅ Viðvaranir stilltar!';
     btnEl.style.background = 'linear-gradient(135deg, #1a6b3c, #27ae60)';
     btnEl.disabled = false;
-    descEl.textContent = "You'll get a nudge 30 min before each low tide today. 🐾";
+    descEl.textContent = "Þú færð tilkynningu 30 mín fyrir hverja fjöru í dag. 🐾";
     tipEl.style.display = 'none';
     renderNotifTimes();
   } else if (perm === 'denied') {
     statusEl.textContent = 'Blocked';
     statusEl.className = 'notif-status denied';
     btnEl.disabled = true;
-    btnEl.textContent = '🚫 Blocked — see tip below';
+    btnEl.textContent = '🚫 Lokað — sjá ábendingu';
     tipEl.style.display = 'block';
-    tipEl.innerHTML = '📱 To fix on iPhone: <strong>Settings → Apps → Safari → Notifications</strong> → allow this site, then refresh.';
+    tipEl.innerHTML = '📱 Til að laga á iPhone: <strong>Settings → Apps → Safari → Notifications</strong> → allow this site, then refresh.';
   } else {
     statusEl.textContent = 'Off';
     statusEl.className = 'notif-status default';
     btnEl.disabled = false;
-    btnEl.textContent = '🔔 Notify me at low tide';
+    btnEl.textContent = '🔔 Tilkynna mér við fjöru';
     btnEl.style.background = '';
     tipEl.style.display = 'block';
     tipEl.innerHTML = '📱 <strong>iPhone:</strong> First add to Home Screen (Share → Add to Home Screen), open from there, then tap the button above.';
@@ -1418,8 +1436,8 @@ function renderNotifTimes() {
     const row = document.createElement('div');
     row.className = 'notif-time-row';
     row.innerHTML = `
-      <span class="notif-time-label">🏖️ Low tide at ${t.timeStr}</span>
-      <span class="notif-time-val">Alert at ${notifStr}</span>
+      <span class="notif-time-label">🏖️ Fjara kl. ${t.timeStr}</span>
+      <span class="notif-time-val">Viðvörun kl. ${notifStr}</span>
     `;
     el.appendChild(row);
   });
@@ -1442,8 +1460,8 @@ function scheduleNotifications() {
     const msUntil = notifTime - now;
     if (msUntil < 0) return;
     const id = setTimeout(() => {
-      new Notification("🏖️ Time for Floki's beach walk!", {
-        body: `Low tide at ${t.timeStr} — grab the leash! 🐾`,
+      new Notification("🏖️ Tími fyrir strandferð Floka!", {
+        body: `Fjara kl. ${t.timeStr} — taktu taumin! 🐾`,
         tag: 'floki-' + t.timeStr,
         requireInteraction: true
       });
