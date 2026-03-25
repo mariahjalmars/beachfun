@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floki's Beach Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean-deep: #0a2342;
+    --ocean-mid: #1a4a7a;
+    --ocean-light: #2d7dd2;
+    --sand: #f5e6c8;
+    --sand-dark: #e8d5a8;
+    --foam: #e8f4f8;
+    --go-green: #2ecc71;
+    --caution-amber: #f39c12;
+    --no-red: #e74c3c;
+    --text-light: #f0f4f8;
+    --text-muted: rgba(240,244,248,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--ocean-deep);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated ocean background */
+  .ocean-bg {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #060f1e 0%, #0a2342 40%, #0d3060 70%, #1a4a7a 100%);
+    z-index: 0;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.2; }
+    to { opacity: 0.9; }
+  }
+
+  /* Wave layers */
+  .waves {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .wave {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 100%;
+    animation: waveScroll linear infinite;
+  }
+
+  .wave svg { width: 100%; height: 100%; }
+
+  .wave1 { animation-duration: 8s; opacity: 0.5; }
+  .wave2 { animation-duration: 12s; opacity: 0.3; animation-direction: reverse; bottom: 10px; }
+  .wave3 { animation-duration: 6s; opacity: 0.2; bottom: 20px; }
+
+  @keyframes waveScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Main container */
+  .container {
+    position: relative;
+    z-index: 10;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 24px 20px 160px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+
+  .paw-icon {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 8px;
+    animation: wag 2s ease-in-out infinite;
+  }
+
+  @keyframes wag {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    color: var(--text-light);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span {
+    color: var(--sand);
+  }
+
+  .header .subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Main verdict card */
+  .verdict-card {
+    border-radius: 28px;
+    padding: 32px 28px;
+    margin: 8px 0 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s ease;
+    cursor: default;
+  }
+
+  .verdict-card.go {
+    background: linear-gradient(135deg, #1a6b3c 0%, #27ae60 60%, #2ecc71 100%);
+    box-shadow: 0 20px 60px rgba(46,204,113,0.3), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .verdict-card.caution {
+    background: linear-gradient(135deg, #7d5005 0%, #d68910 60%, #f39c12 100%);
+    box-shadow: 0 20px 60px rgba(243,156,18,0.3), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .verdict-card.no {
+    background: linear-gradient(135deg, #7b1a1a 0%, #c0392b 60%, #e74c3c 100%);
+    box-shadow: 0 20px 60px rgba(231,76,60,0.3), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .verdict-card.loading {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
+    box-shadow: 0 20px 60px rgba(45,125,210,0.2), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .verdict-shimmer {
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: skewX(-20deg);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { left: -60%; }
+    50% { left: 120%; }
+  }
+
+  .verdict-emoji {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+    animation: bounce 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-8px); }
+  }
+
+  .verdict-title {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .verdict-desc {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* Tide meter */
+  .tide-meter-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .meter-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+
+  .tide-bar-wrap {
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px;
+    height: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tide-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #2d7dd2, #56b4e9);
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+
+  .tide-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    background: rgba(255,255,255,0.4);
+    border-radius: 0 20px 20px 0;
+    animation: glimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes glimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .tide-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .tide-labels span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .tide-height-display {
+    text-align: right;
+    margin-top: 6px;
+  }
+
+  .tide-height-display .height-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--sand);
+    line-height: 1;
+  }
+
+  .tide-height-display .height-unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 3px;
+  }
+
+  .tide-direction {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    justify-content: flex-end;
+  }
+
+  .tide-direction .dir-arrow {
+    font-size: 1rem;
+    transition: transform 0.3s;
+  }
+
+  .tide-direction .dir-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Info grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .info-tile {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .info-tile .tile-icon { font-size: 1.4rem; margin-bottom: 6px; display: block; }
+  .info-tile .tile-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+  .info-tile .tile-value { font-family: 'Fraunces', serif; font-size: 1.2rem; color: var(--sand); font-weight: 300; }
+  .info-tile .tile-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* Timeline */
+  .timeline-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .timeline-title {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    position: relative;
+  }
+
+  .timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 38px;
+    bottom: -10px;
+    width: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .timeline-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-dot.high { background: rgba(45,125,210,0.3); border: 2px solid #2d7dd2; }
+  .timeline-dot.low { background: rgba(86,180,233,0.15); border: 2px solid rgba(86,180,233,0.4); }
+  .timeline-dot.current { background: rgba(243,156,18,0.3); border: 2px solid #f39c12; box-shadow: 0 0 12px rgba(243,156,18,0.4); }
+
+  .timeline-info { flex: 1; }
+  .timeline-info .t-time { font-family: 'Fraunces', serif; font-size: 1.1rem; color: var(--sand); font-weight: 300; }
+  .timeline-info .t-label { font-size: 0.75rem; color: var(--text-muted); }
+
+  .timeline-info .t-beach {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 3px;
+    display: inline-block;
+  }
+
+  .t-beach.go-badge { background: rgba(46,204,113,0.2); color: #2ecc71; }
+  .t-beach.caution-badge { background: rgba(243,156,18,0.2); color: #f39c12; }
+  .t-beach.no-badge { background: rgba(231,76,60,0.2); color: #e74c3c; }
+
+  .timeline-height {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    color: rgba(240,244,248,0.5);
+    font-weight: 300;
+  }
+
+  /* Refresh button */
+  .refresh-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: var(--text-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .refresh-btn:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .refresh-btn:active { transform: scale(0.98); }
+
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Location badge */
+  .location-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-top: 8px;
+    margin-bottom: 20px;
+  }
+
+  /* Error state */
+  .error-msg {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 12px;
+  }
+
+  /* Loading pulse */
+  .loading-pulse {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+  }
+
+  .loading-pulse span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .loading-pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(0.7); opacity: 0.4; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  .last-updated {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+
+  /* Floki photo */
+  .floki-photo-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.15), 0 8px 32px rgba(0,0,0,0.5);
+    transition: box-shadow 0.5s ease;
+  }
+
+  .floki-photo-wrap.go-glow {
+    box-shadow: 0 0 0 4px rgba(46,204,113,0.6), 0 0 30px rgba(46,204,113,0.4), 0 8px 32px rgba(0,0,0,0.5);
+    animation: photoGlow 2s ease-in-out infinite alternate;
+  }
+
+  .floki-photo-wrap.caution-glow {
+    box-shadow: 0 0 0 4px rgba(243,156,18,0.6), 0 0 30px rgba(243,156,18,0.4), 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .floki-photo-wrap.no-glow {
+    box-shadow: 0 0 0 4px rgba(231,76,60,0.6), 0 0 30px rgba(231,76,60,0.3), 0 8px 32px rgba(0,0,0,0.5);
+    filter: grayscale(40%);
+  }
+
+  @keyframes photoGlow {
+    from { box-shadow: 0 0 0 4px rgba(46,204,113,0.6), 0 0 20px rgba(46,204,113,0.3), 0 8px 32px rgba(0,0,0,0.5); }
+    to   { box-shadow: 0 0 0 4px rgba(46,204,113,0.9), 0 0 50px rgba(46,204,113,0.6), 0 8px 32px rgba(0,0,0,0.5); }
+  }
+
+  .floki-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    transition: filter 0.5s ease;
+  }
+
+  .floki-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transition: background 0.5s ease;
+  }
+
+  .floki-caption {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    transition: all 0.4s ease;
+  }
+
+
+  /* Countdown */
+  .countdown-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .countdown-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .countdown-icon {
+    font-size: 2.4rem;
+    animation: bob 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes bob {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-6px); }
+  }
+
+  .countdown-time {
+    font-family: 'Fraunces', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--sand);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .countdown-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .countdown-after {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding-left: 4px;
+  }
+
+
+  /* Water level visual */
+  .water-level-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+
+  .water-level-bg {
+    flex: 1;
+    height: 80px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .water-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transition: height 1.4s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 0 0 14px 14px;
+  }
+
+  .water-surface {
+    position: absolute;
+    top: -18px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+  }
+
+  .wave-svg {
+    width: 200%;
+    height: 100%;
+    animation: waveMove 3s linear infinite;
+  }
+
+  @keyframes waveMove {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .water-labels {
+    position: absolute;
+    top: 0; right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px 8px;
+    pointer-events: none;
+  }
+
+  .water-label-high, .water-label-low {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 600;
+  }
+
+  .water-right {
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .water-dir {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    color: var(--sand);
+    font-weight: 300;
+    white-space: nowrap;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 14px 0;
+  }
+
+
+  /* Notification banner */
+  .notif-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .notif-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .notif-info { flex: 1; }
+  .notif-title {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+  .notif-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .notif-toggle {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .notif-toggle input { display: none; }
+
+  .notif-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 28px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .notif-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .notif-toggle input:checked + .notif-slider {
+    background: var(--go-green);
+  }
+
+  .notif-toggle input:checked + .notif-slider::before {
+    transform: translateX(24px);
+  }
+
+  .notif-status {
+    font-size: 0.72rem;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.2);
+    color: var(--text-muted);
+    display: none;
+    line-height: 1.5;
+  }
+
+  .notif-status.show { display: block; }
+  .notif-status.ok { color: var(--go-green); }
+  .notif-status.warn { color: var(--caution-amber); }
+
+  /* API status dot */
+  .api-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
+    background: var(--text-muted);
+  }
+  .api-dot.live { background: var(--go-green); animation: blink 2s infinite; }
+  .api-dot.fallback { background: var(--caution-amber); }
+  @keyframes blink {
+    0%,100% { opacity:1; } 50% { opacity:0.3; }
+  }
+
+  /* Notification banner */
+  .notif-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .notif-title {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .notif-status {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .notif-status.granted { background: rgba(46,204,113,0.2); color: #2ecc71; }
+  .notif-status.denied  { background: rgba(231,76,60,0.2);  color: #e74c3c; }
+  .notif-status.default { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+
+  .notif-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .notif-desc {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .notif-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #2d7dd2, #1a5fa8);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .notif-btn:hover { filter: brightness(1.15); }
+  .notif-btn:active { transform: scale(0.98); }
+  .notif-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .notif-times {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .notif-time-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+
+  .notif-time-label { font-size: 0.82rem; color: var(--text-muted); }
+  .notif-time-val { font-family: 'Fraunces', serif; font-size: 1rem; color: var(--sand); font-weight: 300; }
+
+  .notif-ios-tip {
+    background: rgba(255,214,0,0.08);
+    border: 1px solid rgba(255,214,0,0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    color: rgba(255,214,0,0.85);
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="ocean-bg"></div>
+<div class="stars" id="stars"></div>
+
+<!-- Animated waves -->
+<div class="waves">
+  <div class="wave wave1">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 L1440,120 L0,120 Z" fill="rgba(26,74,122,0.6)"/>
+    </svg>
+  </div>
+  <div class="wave wave2">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0,40 C200,80 400,10 600,50 C800,90 1000,20 1200,60 C1300,80 1380,50 1440,40 L1440,120 L0,120 Z" fill="rgba(10,35,66,0.8)"/>
+    </svg>
+  </div>
+  <div class="wave wave3">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 C360,70 720,10 1080,40 C1200,55 1340,30 1440,40 L1440,80 L0,80 Z" fill="rgba(6,15,30,0.9)"/>
+    </svg>
+  </div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="floki-photo-wrap" id="flokiPhotoWrap">
+      <img src="data:image/jpeg;base64,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" class="floki-photo" id="flokiPhoto" alt="Floki" />
+      <div class="floki-overlay" id="flokiOverlay"></div>
+      <div class="floki-caption" id="flokiCaption">🐾</div>
+    </div>
+    <h1>Floki's <span>Beach Check</span></h1>
+    <p class="subtitle">Reykjavik, Iceland</p>
+  </div>
+
+  <div class="location-badge">
+    <span>📍</span>
+    <span>64.15° N · 21.93° W</span>
+  </div>
+
+  <!-- Verdict Card -->
+  <div class="verdict-card loading" id="verdictCard">
+    <div class="verdict-shimmer"></div>
+    <span class="verdict-emoji" id="verdictEmoji">🌊</span>
+    <div class="verdict-title" id="verdictTitle">Checking tides…</div>
+    <div class="verdict-desc" id="verdictDesc">
+      <div class="loading-pulse"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Tide Card: level + countdown -->
+  <div class="tide-meter-card">
+
+    <!-- Water level visual -->
+    <div class="water-level-wrap">
+      <div class="water-level-bg">
+        <div class="water-fill" id="waterFill">
+          <div class="water-surface">
+            <svg viewBox="0 0 300 20" preserveAspectRatio="none" class="wave-svg">
+              <path id="wavePath" d="M0,10 C50,2 100,18 150,10 C200,2 250,18 300,10 L300,20 L0,20 Z" fill="rgba(86,180,233,0.9)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="water-labels">
+          <span class="water-label-high">HIGH</span>
+          <span class="water-label-low">LOW</span>
+        </div>
+        <div class="water-level-line" id="waterLevelLine"></div>
+      </div>
+      <div class="water-right">
+        <div class="water-dir" id="waterDir">↗ Rising</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Countdown -->
+    <div class="countdown-wrap">
+      <div class="countdown-main">
+        <span class="countdown-icon" id="countdownIcon">🌊</span>
+        <div>
+          <div class="countdown-time" id="countdownTime">—</div>
+          <div class="countdown-label" id="countdownLabel">until high tide</div>
+        </div>
+      </div>
+      <div class="countdown-after" id="countdownAfter"></div>
+    </div>
+
+  </div>
+
+  <!-- Info Grid -->
+  <div class="info-grid">
+    <div class="info-tile">
+      <span class="tile-icon">⬆️</span>
+      <div class="tile-label">Next High</div>
+      <div class="tile-value" id="nextHighVal">—</div>
+      <div class="tile-sub" id="nextHighHeight">—</div>
+    </div>
+    <div class="info-tile">
+      <span class="tile-icon">⬇️</span>
+      <div class="tile-label">Next Low</div>
+      <div class="tile-value" id="nextLowVal">—</div>
+      <div class="tile-sub" id="nextLowHeight">—</div>
+    </div>
+  </div>
+
+  <!-- Today's Timeline -->
+  <div class="timeline-card">
+    <div class="timeline-title">Today's Tide Schedule</div>
+    <div class="timeline" id="timeline">
+      <div class="error-msg">Loading schedule…</div>
+    </div>
+  </div>
+
+  <!-- Notification Card -->
+  <div class="notif-card">
+    <div class="notif-header">
+      <div class="notif-title">🔔 Beach Alerts for Floki</div>
+      <div class="notif-status default" id="notifStatus">Off</div>
+    </div>
+    <div class="notif-body">
+      <div class="notif-desc" id="notifDesc">Get notified 30 minutes before low tide — the best time to go!</div>
+      <div class="notif-times" id="notifTimes"></div>
+      <button class="notif-btn" id="notifBtn" onclick="requestNotifications()">
+        🔔 Notify me at low tide
+      </button>
+      <div class="notif-ios-tip" id="notifTip" style="display:none"></div>
+    </div>
+  </div>
+
+  <button class="refresh-btn" id="refreshBtn" onclick="fetchTideData()">
+    <span id="refreshIcon">🔄</span> Refresh for Floki
+  </button>
+  <div class="last-updated" id="lastUpdated"></div>
+</div>
+
+<script>
+// ── Generate stars ──
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 60 + '%';
+  s.style.animationDelay = Math.random() * 3 + 's';
+  s.style.animationDuration = (2 + Math.random() * 3) + 's';
+  s.style.opacity = Math.random() * 0.6 + 0.1;
+  starsEl.appendChild(s);
+}
+
+// ── Beach suitability logic ──
+// Tide height thresholds (in metres, typical Reykjavik range 0 – ~4m)
+// > 2.5m = too high (waves close in, little beach space)
+// 1.5 – 2.5m = caution (OK but wet paws)
+// < 1.5m = great for Floki!
+const TIDE_MAX_REYKJAVIK = 4.0;
+
+function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
+  // Also factor in if high tide is very soon
+  if (heightM > 2.8) {
+    return {
+      status: 'no',
+      emoji: '🚫',
+      title: 'Stay home, Floki!',
+      desc: 'The tide is very high right now — the beach is mostly underwater. Not a good day for fetch!'
+    };
+  }
+  if (heightM > 1.8) {
+    return {
+      status: 'caution',
+      emoji: '⚠️',
+      title: 'Muddy paws ahead',
+      desc: 'The tide is fairly high. You can visit but expect wet paws and limited dry beach space. Watch the waves!'
+    };
+  }
+  if (isRising && nextHighH > 2.5 && nextHighMins < 90) {
+    return {
+      status: 'caution',
+      emoji: '⏳',
+      title: 'Go soon or wait',
+      desc: `Tide is rising fast — high tide in ${Math.round(nextHighMins)} min. Go now and keep it short, or wait until after high tide!`
+    };
+  }
+  return {
+    status: 'go',
+    emoji: '🐕',
+    title: 'Let\'s go, Floki!',
+    desc: 'Low tide — perfect conditions for running, fetching sticks and chasing waves. Enjoy the beach!'
+  };
+}
+
+function getBeachBadge(heightM) {
+  if (heightM > 2.8) return { cls: 'no-badge', label: 'Too high' };
+  if (heightM > 1.8) return { cls: 'caution-badge', label: 'Caution' };
+  return { cls: 'go-badge', label: 'Great time!' };
+}
+
+// ── Fetch tide data from tide-forecast.com via Open-Meteo Marine API ──
+// We use Open-Meteo's free marine API for sea level data, no key required.
+async function fetchTideData() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  icon.classList.add('spin');
+  btn.disabled = true;
+
+  // When opened as a local file, fetch() is blocked — go straight to harmonic
+  if (location.protocol === 'file:') {
+    simulateTideData();
+    icon.classList.remove('spin');
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    const lat = 64.15, lon = -21.93;
+    const today = new Date();
+    const d1 = today.toISOString().split('T')[0];
+    const d2 = new Date(today.getTime() + 86400000).toISOString().split('T')[0];
+    const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl&models=smoc&timezone=Atlantic%2FReykjavik&start_date=${d1}&end_date=${d2}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API failed: ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.reason || 'API error');
+
+    const times = data.hourly?.time;
+    const levels = data.hourly?.sea_level_height_msl;
+    if (!times || !levels || levels.every(v => v === null)) throw new Error('No data');
+
+    const tides = [];
+    for (let i = 1; i < levels.length - 1; i++) {
+      const prev = levels[i-1], cur = levels[i], next = levels[i+1];
+      if (cur === null || prev === null || next === null) continue;
+      const isHigh = cur > prev && cur > next;
+      const isLow  = cur < prev && cur < next;
+      if (!isHigh && !isLow) continue;
+      const dt = new Date(times[i]);
+      if (dt.toDateString() !== today.toDateString()) continue;
+      const timeH = dt.getHours() + dt.getMinutes() / 60;
+      const timeStr = dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      tides.push({ type: isHigh ? 'high' : 'low', time: timeStr, timeH, heightM: cur });
+    }
+    if (tides.length < 2) throw new Error('Not enough extremes');
+
+    renderTideData(tides, levels, times);
+
+  } catch(e) {
+    simulateTideData();
+  }
+
+  icon.classList.remove('spin');
+  btn.disabled = false;
+}
+
+// Called when live API works — renders using real data
+function renderTideData(tides, levels, times) {
+  window._dataSource = 'live';
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+
+  // Interpolate current height from hourly data
+  let currentHeight = null;
+  for (let i = 0; i < times.length - 1; i++) {
+    const t0 = new Date(times[i]);
+    const t1 = new Date(times[i+1]);
+    if (now >= t0 && now < t1 && levels[i] !== null && levels[i+1] !== null) {
+      const frac = (now - t0) / (t1 - t0);
+      currentHeight = levels[i] + (levels[i+1] - levels[i]) * frac;
+      break;
+    }
+  }
+  if (currentHeight === null) currentHeight = levels[0] || 1.0;
+
+  const prevH = currentHeight - 0.05; // approximate
+  // Check actual trend from hourly data
+  let isRising = true;
+  for (let i = 1; i < times.length; i++) {
+    const t0 = new Date(times[i-1]);
+    const t1 = new Date(times[i]);
+    if (now >= t0 && now < t1) {
+      isRising = (levels[i] || 0) > (levels[i-1] || 0);
+      break;
+    }
+  }
+
+  renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr);
+}
+
+// Harmonic fallback if API is unavailable
+function simulateTideData() {
+  window._dataSource = 'fallback';
+  // Seed from known Reykjavik tidal pattern — roughly correct, advances ~50 min/day
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+
+  // Days since March 25 2026 reference
+  const ref = new Date('2026-03-25T00:00:00');
+  const daysDiff = (now - ref) / 86400000;
+  // Reykjavik tides advance ~50 min per day
+  const shift = (daysDiff * 50 / 60); // hours
+
+  function shiftTime(baseH) {
+    return ((baseH + shift) % 24 + 24) % 24;
+  }
+  function formatShifted(baseH) {
+    const shifted = shiftTime(baseH);
+    return formatTime12(shifted);
+  }
+
+  const baseTides = [
+    { type: 'low',  baseH: 4.85,  heightM: 1.12 },
+    { type: 'high', baseH: 11.07, heightM: 3.18 },
+    { type: 'low',  baseH: 17.13, heightM: 1.12 },
+    { type: 'high', baseH: 23.63, heightM: 3.18 },
+  ];
+
+  const tides = baseTides.map(t => ({
+    ...t,
+    timeH: shiftTime(t.baseH),
+    time: formatTime12(shiftTime(t.baseH))
+  })).sort((a,b) => a.timeH - b.timeH);
+
+  function interpolate(t) {
+    let prev = tides[tides.length - 1];
+    let next = tides[0];
+    for (let i = 0; i < tides.length; i++) {
+      if (tides[i].timeH <= t) prev = tides[i];
+      if (tides[i].timeH > t && next === tides[0]) next = tides[i];
+    }
+    if (prev.timeH > next.timeH) {
+      const span = (24 - prev.timeH) + next.timeH;
+      const elapsed = (t - prev.timeH + 24) % 24;
+      const frac = elapsed / span;
+      return prev.heightM + (next.heightM - prev.heightM) * (1 - Math.cos(frac * Math.PI)) / 2;
+    }
+    const span = next.timeH - prev.timeH;
+    const elapsed = t - prev.timeH;
+    const frac = span > 0 ? elapsed / span : 0;
+    return prev.heightM + (next.heightM - prev.heightM) * (1 - Math.cos(frac * Math.PI)) / 2;
+  }
+
+  const currentHeight = Math.max(0, interpolate(h));
+  const isRising = interpolate(h) > interpolate(h - 0.1);
+
+  renderUI(tides, currentHeight, isRising, h, '—', '—');
+}
+
+// Shared render function used by both live and fallback
+function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
+  const now = new Date();
+  window._currentTides = tides; // store for notification scheduler
+  if (localStorage.getItem('floki_notif') === 'on' && Notification.permission === 'granted') {
+    document.getElementById('notifToggle').checked = true;
+    scheduleNotifications();
+  }
+
+  // Find next high and low
+  let nextHigh = null, nextLow = null;
+  for (const t of tides) {
+    if (t.timeH > h) {
+      if (!nextHigh && t.type === 'high') nextHigh = t;
+      if (!nextLow && t.type === 'low') nextLow = t;
+    }
+  }
+  if (!nextHigh) nextHigh = tides.find(t => t.type === 'high');
+  if (!nextLow) nextLow = tides.find(t => t.type === 'low');
+
+  const nextHighMins = nextHigh ? (nextHigh.timeH - h) * 60 : 999;
+
+  // Verdict
+  const v = getTideVerdict(currentHeight, isRising, nextHigh?.heightM || 0, nextHighMins);
+
+  // Update UI
+  const card = document.getElementById('verdictCard');
+  card.className = `verdict-card ${v.status}`;
+  document.getElementById('verdictEmoji').textContent = v.emoji;
+  document.getElementById('verdictTitle').textContent = v.title;
+  document.getElementById('verdictDesc').textContent = v.desc;
+
+  // Water level fill (0–100%)
+  const pct = Math.min(100, Math.max(4, (currentHeight / TIDE_MAX_REYKJAVIK) * 100));
+  const fillEl = document.getElementById('waterFill');
+  fillEl.style.height = pct + '%';
+  // Color: blue when low, deeper blue when high
+  const blueVal = Math.round(80 + pct * 0.4);
+  fillEl.style.background = `rgba(30, ${blueVal}, 180, 0.5)`;
+
+  document.getElementById('waterDir').textContent = isRising ? '↗ Rising' : '↘ Falling';
+
+  // Countdown to next tide change
+  const eventsAhead = tides.filter(t => t.timeH > h);
+  const nextEvent = eventsAhead.length > 0 ? eventsAhead[0] : tides[0];
+  const nextEventMins = Math.max(0, (nextEvent.timeH - h) * 60);
+  const hrs = Math.floor(nextEventMins / 60);
+  const mins = Math.round(nextEventMins % 60);
+  const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+  const isNextHigh = nextEvent.type === 'high';
+
+  document.getElementById('countdownIcon').textContent = isNextHigh ? '🌊' : '🏖️';
+  document.getElementById('countdownTime').textContent = timeStr;
+  document.getElementById('countdownLabel').textContent = isNextHigh ? 'until high tide' : 'until low tide';
+
+  // Show what comes after
+  const afterEvents = eventsAhead.slice(1);
+  const afterEvent = afterEvents.length > 0 ? afterEvents[0] : null;
+  if (afterEvent) {
+    const afterMins = Math.max(0, (afterEvent.timeH - h) * 60);
+    const aHrs = Math.floor(afterMins / 60);
+    const aMins = Math.round(afterMins % 60);
+    const afterTimeStr = aHrs > 0 ? `${aHrs}h ${aMins}m` : `${aMins} min`;
+    const afterLabel = afterEvent.type === 'high' ? '🌊 high tide' : '🏖️ low tide';
+    document.getElementById('countdownAfter').textContent = `Then ${afterLabel} in ${afterTimeStr}`;
+  }
+
+  // Info tiles
+  if (nextHigh) {
+    document.getElementById('nextHighVal').textContent = nextHigh.time;
+    document.getElementById('nextHighHeight').textContent = nextHigh.heightM.toFixed(2) + 'm';
+  }
+  if (nextLow) {
+    document.getElementById('nextLowVal').textContent = nextLow.time;
+    document.getElementById('nextLowHeight').textContent = nextLow.heightM.toFixed(2) + 'm';
+  }
+
+  // Timeline
+  const timelineEl = document.getElementById('timeline');
+  timelineEl.innerHTML = '';
+
+  // Add "Now" marker and all tides
+  const allEvents = [];
+  allEvents.push({ type: 'current', time: formatTime12(h), timeH: h, heightM: currentHeight });
+  tides.forEach(t => allEvents.push(t));
+  allEvents.sort((a, b) => a.timeH - b.timeH);
+
+  allEvents.forEach(event => {
+    const badge = getBeachBadge(event.heightM);
+    const isCurrent = event.type === 'current';
+    const isHigh = event.type === 'high';
+    const dotClass = isCurrent ? 'current' : isHigh ? 'high' : 'low';
+    const emoji = isCurrent ? '📍' : isHigh ? '🌊' : '🏖️';
+    const label = isCurrent ? 'Right now' : isHigh ? 'High tide' : 'Low tide';
+    const isPast = !isCurrent && event.timeH < h;
+
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.style.opacity = isPast ? '0.45' : '1';
+    item.innerHTML = `
+      <div class="timeline-dot ${dotClass}">${emoji}</div>
+      <div class="timeline-info">
+        <div class="t-time">${event.time}</div>
+        <div class="t-label">${label}</div>
+        <span class="t-beach ${badge.cls}">${badge.label}</span>
+      </div>
+      <div class="timeline-height">${event.heightM.toFixed(2)}m</div>
+    `;
+    timelineEl.appendChild(item);
+  });
+
+  // Register low tides for notifications
+  setLowTidesForNotif(tides);
+
+  // Last updated
+  const nowStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const src = window._dataSource || 'fallback';
+  const dot = src === 'live' ? '🟢 Live data' : '🟡 Estimated';
+  document.getElementById('lastUpdated').textContent = (location.protocol === 'file:' ? 'Estimated · ' : 'Live · ') + 'Updated ' + nowStr;
+}
+
+function formatTime12(h) {
+  const totalMin = Math.round(h * 60);
+  const hh = Math.floor(totalMin / 60) % 24;
+  const mm = totalMin % 60;
+  const ampm = hh >= 12 ? 'PM' : 'AM';
+  const displayH = hh % 12 || 12;
+  return `${displayH}:${mm.toString().padStart(2,'0')} ${ampm}`;
+}
+
+// Run on load
+fetchTideData();
+
+// Auto-refresh every 10 minutes
+setInterval(fetchTideData, 10 * 60 * 1000);
+
+// ── Notification System ──
+// Works on iPhone when app is "Add to Home Screen" (iOS 16.4+)
+
+
+
+
+
+
+
+function updateNotifUI() {
+  const perm = (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
+  const statusEl = document.getElementById('notifStatus');
+  const btnEl    = document.getElementById('notifBtn');
+  const tipEl    = document.getElementById('notifTip');
+  const descEl   = document.getElementById('notifDesc');
+
+  if (typeof Notification === 'undefined') {
+    statusEl.textContent = 'Not supported';
+    statusEl.className = 'notif-status denied';
+    btnEl.disabled = true;
+    tipEl.style.display = 'block';
+    tipEl.innerHTML = '📱 <strong>iPhone tip:</strong> Open this page in Safari, tap Share → <strong>Add to Home Screen</strong>, then open from your Home Screen. Notifications require iOS 16.4+ with the app added to Home Screen.';
+    return;
+  }
+
+  if (perm === 'granted') {
+    statusEl.textContent = 'On ✓';
+    statusEl.className = 'notif-status granted';
+    btnEl.textContent = '✅ Alerts scheduled!';
+    btnEl.style.background = 'linear-gradient(135deg, #1a6b3c, #27ae60)';
+    btnEl.disabled = false;
+    descEl.textContent = "You'll get a nudge 30 min before each low tide today. 🐾";
+    tipEl.style.display = 'none';
+    renderNotifTimes();
+  } else if (perm === 'denied') {
+    statusEl.textContent = 'Blocked';
+    statusEl.className = 'notif-status denied';
+    btnEl.disabled = true;
+    btnEl.textContent = '🚫 Blocked — see tip below';
+    tipEl.style.display = 'block';
+    tipEl.innerHTML = '📱 To fix on iPhone: <strong>Settings → Apps → Safari → Notifications</strong> → allow this site, then refresh.';
+  } else {
+    statusEl.textContent = 'Off';
+    statusEl.className = 'notif-status default';
+    btnEl.disabled = false;
+    btnEl.textContent = '🔔 Notify me at low tide';
+    btnEl.style.background = '';
+    tipEl.style.display = 'block';
+    tipEl.innerHTML = '📱 <strong>iPhone:</strong> First add to Home Screen (Share → Add to Home Screen), open from there, then tap the button above.';
+  }
+}
+
+function renderNotifTimes() {
+  const el = document.getElementById('notifTimes');
+  if (!el) return;
+  el.innerHTML = '';
+  lowTideTimesForNotif.forEach(t => {
+    const notifTime = new Date(t.date.getTime() - 30 * 60000);
+    const notifStr  = notifTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const row = document.createElement('div');
+    row.className = 'notif-time-row';
+    row.innerHTML = `
+      <span class="notif-time-label">🏖️ Low tide at ${t.timeStr}</span>
+      <span class="notif-time-val">Alert at ${notifStr}</span>
+    `;
+    el.appendChild(row);
+  });
+}
+
+async function requestNotifications() {
+  if (typeof Notification === 'undefined') { updateNotifUI(); return; }
+  const perm = await Notification.requestPermission();
+  updateNotifUI();
+  if (perm === 'granted') scheduleNotifications();
+}
+
+function scheduleNotifications() {
+  scheduledNotifIds.forEach(id => clearTimeout(id));
+  scheduledNotifIds = [];
+  if (!lowTideTimesForNotif.length) return;
+  const now = new Date();
+  lowTideTimesForNotif.forEach(t => {
+    const notifTime = new Date(t.date.getTime() - 30 * 60000);
+    const msUntil = notifTime - now;
+    if (msUntil < 0) return;
+    const id = setTimeout(() => {
+      new Notification("🏖️ Time for Floki's beach walk!", {
+        body: `Low tide at ${t.timeStr} — grab the leash! 🐾`,
+        tag: 'floki-' + t.timeStr,
+        requireInteraction: true
+      });
+    }, msUntil);
+    scheduledNotifIds.push(id);
+  });
+  renderNotifTimes();
+}
+
+function setLowTidesForNotif(tides) {
+  const today = new Date();
+  lowTideTimesForNotif = tides
+    .filter(t => t.type === 'low')
+    .map(t => {
+      const d = new Date(today);
+      d.setHours(Math.floor(t.timeH), Math.round((t.timeH % 1) * 60), 0, 0);
+      return { date: d, timeStr: t.time };
+    })
+    .filter(t => t.date > new Date());
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    scheduleNotifications();
+  }
+  updateNotifUI();
+}
+
+// Init
+updateNotifUI();
+</script>
+</body>
+</html>
