@@ -922,7 +922,7 @@
       <div class="floki-overlay" id="flokiOverlay"></div>
       <div class="floki-caption" id="flokiCaption">🐾</div>
     </div>
-    <h1>Floki's <span>Strandvakt</span></h1>
+    <h1>Flóki's <span>Strandvakt</span></h1>
     <p class="subtitle">Reykjavík, Ísland</p>
   </div>
 
@@ -961,7 +961,7 @@
         <div class="water-level-line" id="waterLevelLine"></div>
       </div>
       <div class="water-right">
-        <div class="water-dir" id="waterDir">↗ Í vaxandi</div>
+        <div class="water-dir" id="waterDir">↗ VAXANDI</div>
       </div>
     </div>
 
@@ -1005,6 +1005,10 @@
     </div>
   </div>
 
+  <button class="refresh-btn" id="refreshBtn" onclick="fetchTideData()">
+    <span id="refreshIcon">🔄</span> Uppfæra fyrir Floka
+  </button>
+  <div class="last-updated" id="lastUpdated"></div>
   <!-- Notification Card -->
   <div class="notif-card">
     <div class="notif-header">
@@ -1021,10 +1025,7 @@
     </div>
   </div>
 
-  <button class="refresh-btn" id="refreshBtn" onclick="fetchTideData()">
-    <span id="refreshIcon">🔄</span> Uppfæra fyrir Floka
-  </button>
-  <div class="last-updated" id="lastUpdated"></div>
+
 </div>
 
 <script>
@@ -1063,7 +1064,7 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
       status: 'caution',
       emoji: '⚠️',
       title: 'Það er of hættulegt núna, Flóki!',
-      desc: 'Flóðið er frekar hátt. Má fara en búast við blautum pötum. Varist bylgjurnar!'
+      desc: 'Mætti fara en búast má við hundasundi og engu boltakasti!'
     };
   }
   if (isRising && nextHighH > 2.5 && nextHighMins < 90) {
@@ -1278,7 +1279,7 @@ function renderUI(tides, currentHeight, isRising, h, sunriseStr, sunsetStr) {
   const blueVal = Math.round(80 + pct * 0.4);
   fillEl.style.background = `rgba(30, ${blueVal}, 180, 0.5)`;
 
-  document.getElementById('waterDir').textContent = isRising ? '↗ Í vaxandi' : '↘ Í minnkandi';
+  document.getElementById('waterDir').textContent = isRising ? '↗ VAXANDI' : '↘ MINNKANDI';
 
   // Countdown to next tide change
   const eventsAhead = tides.filter(t => t.timeH > h);
