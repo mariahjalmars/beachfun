@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Floki's Strandvakt</title>
+<title>Strandvaktin</title>
 
 <!-- Share thumbnail & preview -->
-<meta property="og:title" content="🐾 Flóki Strandvakt" />
-<meta property="og:description" content="Má Flók fara á ströndina í dag? Flóðamælir fyrir Reykjavík 🌊" />
+<meta property="og:title" content="🐾 Hunda strandvaktin" />
+<meta property="og:description" content="Mega hundar fara á ströndina í dag? Flóðamælir fyrir Reykjavík 🌊" />
 <meta property="og:image" content="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
 <meta property="og:url" content="https://mariahjalmars.github.io/beachfun/floki-beach.html" />
 <meta property="og:type" content="website" />
 
 <!-- iPhone / iMessage specific -->
-<meta name="apple-mobile-web-app-title" content="Flóki Strönd" />
+<meta name="apple-mobile-web-app-title" content="Strönd" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="apple-touch-icon" href="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
 
 <!-- Twitter/X card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="🐾 Flóki Strandvakt" />
-<meta name="twitter:description" content="Má Floki fara á ströndina í dag? Flóðamælir fyrir Reykjavík 🌊" />
+<meta name="twitter:title" content="🐾 Hunda strandvaktint" />
+<meta name="twitter:description" content="Geta hundar farið að leika á ströndinni núna? Sjávarfallaspá fyrir Reykjavík 🌊" />
 <meta name="twitter:image" content="https://mariahjalmars.github.io/beachfun/floki-thumb.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -922,7 +922,7 @@
       <div class="floki-overlay" id="flokiOverlay"></div>
       <div class="floki-caption" id="flokiCaption">🐾</div>
     </div>
-    <h1>Flóki's <span>Strandvakt</span></h1>
+    <h1>Hunda <span>strandvakt</span></h1>
     <p class="subtitle">Reykjavík, Ísland</p>
   </div>
 
@@ -1006,20 +1006,20 @@
   </div>
 
   <button class="refresh-btn" id="refreshBtn" onclick="fetchTideData()">
-    <span id="refreshIcon">🔄</span> Uppfæra fyrir Floka
+    <span id="refreshIcon">🔄</span> Uppfæra fyrir þinn hund?
   </button>
   <div class="last-updated" id="lastUpdated"></div>
   <!-- Notification Card -->
   <div class="notif-card">
     <div class="notif-header">
-      <div class="notif-title">🔔 Strandviðvaranir fyrir Floka</div>
+      <div class="notif-title">🔔 Strandviðvaranir fyrir hunda</div>
       <div class="notif-status default" id="notifStatus">Off</div>
     </div>
     <div class="notif-body">
       <div class="notif-desc" id="notifDesc">Fáðu tilkynningu 30 mínútum fyrir fjöru — besta tíminn til að fara!</div>
       <div class="notif-times" id="notifTimes"></div>
       <button class="notif-btn" id="notifBtn" onclick="requestNotifications()">
-        🔔 Tilkynna mér við fjöru
+        🔔 Tilkynna mér þegar er fjara
       </button>
       <div class="notif-ios-tip" id="notifTip" style="display:none"></div>
     </div>
@@ -1056,14 +1056,14 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
       status: 'no',
       emoji: '🚫',
       title: 'Við förum ekki núna - það er flóð!',
-      desc: 'Flóðið er mjög hátt — strandinn er nánast undir vatni. Ekki góður dagur í prik!'
+      desc: 'Það er háflóð - engin strönd! Ekkert boltakast núna!'
     };
   }
   if (heightM > 1.8) {
     return {
       status: 'caution',
       emoji: '⚠️',
-      title: 'Það er of hættulegt núna, Flóki!',
+      title: 'Það er of hættulegt núna, engin strönd!',
       desc: 'Mætti fara en búast má við hundasundi og engu boltakasti!'
     };
   }
@@ -1071,20 +1071,20 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
     return {
       status: 'caution',
       emoji: '⏳',
-      title: 'Farðu fljótt eða bíddu!',
-      desc: `Flóðið er að hækka hratt — flóð eftir ${Math.round(nextHighMins)} mín. Farðu núna og vertu stutt, eða bíddu eftir flóð!`
+      title: 'Drífa sig núna eða bíða!',
+      desc: `Flóðið er að hækka hratt — flóð eftir ${Math.round(nextHighMins)} mín. Farðu núna og vertu stutt, eða bíddu eftir fjöru!`
     };
   }
   return {
     status: 'go',
     emoji: '🐕',
-    title: 'Förum Flóki!',
-    desc: 'Fjara — fullkomið fyrir hlaupi, prik og bylgjur. Njótið strandarinnar!'
+    title: 'Förum!',
+    desc: 'Fjara — fullkomið fyrir hlaup, bolta og fjör!'
   };
 }
 
 function getBeachBadge(heightM) {
-  if (heightM > 2.8) return { cls: 'no-badge', label: 'Of hátt' };
+  if (heightM > 2.8) return { cls: 'no-badge', label: 'Háflóð' };
   if (heightM > 1.8) return { cls: 'caution-badge', label: 'Varúð' };
   return { cls: 'go-badge', label: 'Frábært!' };
 }
@@ -1396,7 +1396,7 @@ function updateNotifUI() {
     statusEl.className = 'notif-status denied';
     btnEl.disabled = true;
     tipEl.style.display = 'block';
-    tipEl.innerHTML = '📱 <strong>iPhone tip:</strong> Opnaðu þessa síðu í Safari, ýttu á Deila → <strong>Bæta við heimaskjá</strong>, opnaðu þaðan. Tilkynningar þurfa iOS 16.4+ og app á heimaskjá.';
+    tipEl.innerHTML = '📱 <strong>iPhone tip:</strong> Opnaðu þessa síðu í vafra, ýttu á Deila → <strong>Bæta við heimaskjá</strong>, opnaðu þaðan. Tilkynningar þurfa iOS 16.4+ og app á heimaskjá.';
     return;
   }
 
@@ -1420,7 +1420,7 @@ function updateNotifUI() {
     statusEl.textContent = 'Off';
     statusEl.className = 'notif-status default';
     btnEl.disabled = false;
-    btnEl.textContent = '🔔 Tilkynna mér við fjöru';
+    btnEl.textContent = '🔔 Tilkynna mér þegar er fjara';
     btnEl.style.background = '';
     tipEl.style.display = 'block';
     tipEl.innerHTML = '📱 <strong>iPhone:</strong> First add to Home Screen (Share → Add to Home Screen), open from there, then tap the button above.';
@@ -1461,9 +1461,9 @@ function scheduleNotifications() {
     const msUntil = notifTime - now;
     if (msUntil < 0) return;
     const id = setTimeout(() => {
-      new Notification("🏖️ Tími fyrir strandferð Floka!", {
+      new Notification("🏖️ Tími fyrir strandferð!", {
         body: `Fjara kl. ${t.timeStr} — taktu taumin! 🐾`,
-        tag: 'floki-' + t.timeStr,
+        tag: 'strandferð-' + t.timeStr,
         requireInteraction: true
       });
     }, msUntil);
