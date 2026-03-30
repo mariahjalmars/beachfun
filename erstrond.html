@@ -1050,8 +1050,11 @@ for (let i = 0; i < 80; i++) {
 const TIDE_MAX_REYKJAVIK = 4.0;
 
 function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
-  // Also factor in if high tide is very soon
-  if (heightM > 2.8) {
+  // Reykjavik tide range: low ~0.6-1.2m, high ~3.0-4.0m
+  // > 3.0m = beach is underwater, don't go
+  // 2.2-3.0m = getting high, caution
+  // < 2.2m = fine to go (covers mid-tide too)
+  if (heightM > 3.0) {
     return {
       status: 'no',
       emoji: '🚫',
@@ -1059,7 +1062,7 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
       desc: 'Flóðið er mjög hátt — strandinn er nánast undir vatni. Ekki góður dagur í prik!'
     };
   }
-  if (heightM > 1.8) {
+  if (heightM > 2.2) {
     return {
       status: 'caution',
       emoji: '⚠️',
@@ -1067,7 +1070,7 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
       desc: 'Mætti fara en búast má við hundasundi og engu boltakasti!'
     };
   }
-  if (isRising && nextHighH > 2.5 && nextHighMins < 90) {
+  if (isRising && nextHighH > 2.8 && nextHighMins < 60) {
     return {
       status: 'caution',
       emoji: '⏳',
@@ -1084,8 +1087,8 @@ function getTideVerdict(heightM, isRising, nextHighH, nextHighMins) {
 }
 
 function getBeachBadge(heightM) {
-  if (heightM > 2.8) return { cls: 'no-badge', label: 'Háflóð' };
-  if (heightM > 1.8) return { cls: 'caution-badge', label: 'Varúð' };
+  if (heightM > 3.0) return { cls: 'no-badge', label: 'Háflóð' };
+  if (heightM > 2.2) return { cls: 'caution-badge', label: 'Varúð' };
   return { cls: 'go-badge', label: 'Frábært!' };
 }
 
